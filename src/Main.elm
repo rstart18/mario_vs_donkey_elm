@@ -6,7 +6,9 @@ import Playground exposing (..)
 
 -- OBJECT´S
 
-queso = {x = -310, y = 180}
+hammer = {x = -200, y = 180}
+
+coin = {x = -50, y = 180}
 
 -- FUN´S
 
@@ -18,12 +20,13 @@ boolToString bool = if bool then "True" else "False"
 
 main =
   game view update
-    { x = -9
+    { x = 0
     , y = 0
     , vx = 0
     , vy = 0
     , dir = "right"
-    , cheese = False
+    , power = False
+    , bonus = False
     }
 
 
@@ -31,7 +34,7 @@ main =
 -- VIEW
 
 
-view computer spiry =
+view computer mario =
   let
     w = computer.screen.width
     h = computer.screen.height
@@ -43,56 +46,108 @@ view computer spiry =
   , image 80 120 "images/objetos/basura/basura.gif"
       |> moveY (b+100)
       |> moveX (-(w/2)+40)
-  , image 40 40 (toTakeCheese spiry) 
-      |> move queso.x (b + queso.y)
-  , image 50 50 (toGif spiry)
-      |> move spiry.x (b + 70 + spiry.y)
+  , image 40 40 (toTakepower mario) 
+      |> move hammer.x (b + hammer.y)
+  ,image 40 40 (toTakebonus mario) 
+      |> move coin.x (b + coin.y)
+  , image (transform mario) (transform mario) (toGif mario)
+      |> move mario.x (b + (transformMoveY mario) + mario.y)
   , words white (String.fromInt (round b))  
   ]
 
-toTakeCheese spiry = 
-  if spiry.cheese then
+toTakepower mario = 
+  if mario.power then
     ""
-  else 
+  else
     "images/objetos/martillo/martillo.gif"
 
-toGif spiry =
-  if spiry.y > 0 then
-    "images/mario/jump/" ++ spiry.dir ++ ".gif"
-  else if spiry.vx /= 0 then
-    "images/mario/walk/" ++ spiry.dir ++ ".gif"
+toTakebonus mario =
+  if mario.bonus then
+    ""
   else
-    "images/mario/stand/" ++ spiry.dir ++ ".gif"
+    "images/objetos/coin/coin.gif"
 
---COALISION
+transformMoveY mario = 
+    if mario.power then
+      80
+    else 
+      65
 
-condicion_queso = (b+70+y > b+queso.y-25 && b+70+y < b+queso.y+25) && (x > queso.x-25 && x < queso.x+25)
+transform mario = 
+    if mario.power then
+      80
+    else 
+      50
+
+toGif mario =
+  if mario.y > 0 then
+    if mario.power then 
+      "images/mario/jump/attack/" ++ mario.dir ++ ".gif"
+    else
+      "images/mario/jump/" ++ mario.dir ++ ".gif"
+  else if mario.vx /= 0 then
+    if mario.power then
+      "images/mario/walk/attack/" ++ mario.dir ++ ".gif"
+    else
+      "images/mario/walk/" ++ mario.dir ++ ".gif"
+  else
+    if mario.power then
+    "images/mario/stand/attack/" ++ mario.dir ++ ".gif"
+    else
+    "images/mario/stand/" ++ mario.dir ++ ".gif"
+
+
 
 -- UPDATE
 
 
-update computer spiry =
+update computer mario =
   let
     b = computer.screen.bottom
 
     dt = 1.666
     vx = toX computer.keyboard*1.5
     vy =
-      if spiry.y == 0 then
+      if mario.y == 0 then
         if computer.keyboard.up then 8 else 0
       else
-        spiry.vy - dt / 4
-    x = spiry.x + dt * vx
-    y = spiry.y + dt * vy
+        mario.vy - dt / 4
+    x = mario.x + dt * vx
+    y = mario.y + dt * vy
+
+    power = mario.power
+    bonus = mario.bonus
 
   in
   { x = x
   , y = max 0 y
   , vx = vx
   , vy = vy
-  , dir = if vx == 0 then spiry.dir else if vx < 0 then "left" else "right"
-  , cheese = if (b+70+y > b+queso.y-25 && b+70+y < b+queso.y+25) && (x > queso.x-25 && x < queso.x+25) then True else False
+  , dir = if vx == 0 then mario.dir else if vx < 0 then "left" else "right"
+  , power = hammer_coalision power b x y
+  , bonus = coin_coalision bonus b x y
   }
+
+  --COALISION
+
+
+hammer_coalision power b x y = 
+                    if (b+50+y > b+hammer.y-25 && b+50+y < b+hammer.y+25) && (x > hammer.x-25 && x < hammer.x+25) then 
+                      True 
+                    else if power then
+                      True
+                    else
+                      False
+
+coin_coalision bonus b x y = 
+                    if (b+50+y > b+coin.y-25 && b+50+y < b+coin.y+25) && (x > coin.x-25 && x < coin.x+25) then 
+                      True 
+                    else if bonus then
+                      True
+                    else
+                      False
+
+
 --  
   -- SOURCE CODES  
   --    DOCUMENTACION DE ELM
