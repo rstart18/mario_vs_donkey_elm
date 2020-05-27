@@ -13,9 +13,11 @@ suelo = {width = 1350, height = 40}
 
 trash = {width = 80, height = 120}
 
-hammer = {x = -200, y = 180} --Object -200 180
+stairs = {width = 70, height = 180}
 
-coin = {x = -50, y = 180}
+hammer = {x = -200, y = 140} --Object -200 180
+
+coin = {x = -50, y = 140}
 
 -- FUN´S
 
@@ -53,9 +55,19 @@ view computer mario =
   [ rectangle (black) w h
   , image w suelo.height "images/fondo/suelo2.gif"
       |> moveY (b+(midTam suelo.height))
+  , image w suelo.height "images/fondo/suelo2.gif"
+      |> moveY (b+(midTam suelo.height)+stairs.height)
   , image trash.width trash.height "images/objetos/basura/basura.gif"
       |> moveY (b+(midTam trash.height)+ suelo.height)
-      |> moveX (-(w/2)+40)
+      |> moveX (-(w/2)+(midTam trash.width))
+  , image stairs.width stairs.height "images/objetos/escalera/escalera.gif"
+      |> moveY (b+(midTam stairs.height)+ suelo.height)
+      |> moveX ((midTam stairs.width)*2)
+  , image stairs.width stairs.height "images/objetos/escalera/escalera.gif"
+      |> moveY (b+(midTam stairs.height)+ suelo.height)
+      |> moveX ((midTam stairs.width)*16)
+    -- segundo piso
+    -- mario y objetos
   , image 40 40 (toTakepower mario) 
       |> move hammer.x (b + hammer.y)
   ,image 40 40 (toTakebonus mario) 
@@ -124,7 +136,7 @@ update computer mario =
     vx = toX computer.keyboard*1.5
     vy =
       if mario.y == 0 then
-        if computer.keyboard.up then 8 else 0
+        if computer.keyboard.up then 7 else 0
       else
         mario.vy - dt / 4
     x = mario.x + dt * vx
