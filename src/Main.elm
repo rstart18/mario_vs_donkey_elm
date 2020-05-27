@@ -2,11 +2,18 @@ module Main exposing (..)
 import Playground exposing (..)
 
 -- TYPE´S 
-
+type alias Object =
+  { x : Int
+  , y : Int
+  }
 
 -- OBJECT´S
 
-hammer = {x = -200, y = 180}
+suelo = {width = 1350, height = 40}
+
+trash = {width = 80, height = 120}
+
+hammer = {x = -200, y = 180} --Object -200 180
 
 coin = {x = -50, y = 180}
 
@@ -14,6 +21,9 @@ coin = {x = -50, y = 180}
 
 boolToString : Bool -> String
 boolToString bool = if bool then "True" else "False" 
+
+midTam : Float -> Float
+midTam x = (x/2)
 
 -- MAIN
 
@@ -41,19 +51,20 @@ view computer mario =
     b = computer.screen.bottom
   in
   [ rectangle (black) w h
-  , image w h "images/fondo/suelo.gif"
-      |> moveY -270
-  , image 80 120 "images/objetos/basura/basura.gif"
-      |> moveY (b+100)
+  , image w suelo.height "images/fondo/suelo2.gif"
+      |> moveY (b+(midTam suelo.height))
+  , image trash.width trash.height "images/objetos/basura/basura.gif"
+      |> moveY (b+(midTam trash.height)+ suelo.height)
       |> moveX (-(w/2)+40)
   , image 40 40 (toTakepower mario) 
       |> move hammer.x (b + hammer.y)
   ,image 40 40 (toTakebonus mario) 
       |> move coin.x (b + coin.y)
-  , image (transform mario) (transform mario) (toGif mario)
-      |> move mario.x (b + (transformMoveY mario) + mario.y)
-  , words white (String.fromInt (round b))  
+  , image (transform_mario mario.power) (transform_mario mario.power) (toGif mario)
+      |> move mario.x (b + (transform_marioMoveY mario.power) + mario.y)
+  , words white (String.fromInt (round (midtransform_mario mario.power)))  
   ]
+
 
 toTakepower mario = 
   if mario.power then
@@ -67,17 +78,21 @@ toTakebonus mario =
   else
     "images/objetos/coin/coin.gif"
 
-transformMoveY mario = 
-    if mario.power then
-      80
-    else 
-      65
+transform_marioMoveY : Bool -> Float
+transform_marioMoveY mario_bool = if mario_bool then 80 else 65
 
-transform mario = 
-    if mario.power then
-      80
-    else 
-      50
+transform_mario : Bool -> Float
+transform_mario mario_bool = if mario_bool then 80 else 50
+
+midtransform_mario : Bool -> Float
+midtransform_mario  mario_bool = (transform_mario mario_bool)/2
+
+
+
+
+
+
+
 
 toGif mario =
   if mario.y > 0 then
@@ -132,7 +147,7 @@ update computer mario =
 
 
 hammer_coalision power b x y = 
-                    if (b+50+y > b+hammer.y-25 && b+50+y < b+hammer.y+25) && (x > hammer.x-25 && x < hammer.x+25) then 
+                    if (b+(transform_mario power)+y > b+hammer.y-(midtransform_mario power) && b+(transform_mario power)+y < b+hammer.y+(midtransform_mario power)) && (x > hammer.x-(midtransform_mario power) && x < hammer.x+(midtransform_mario power)) then 
                       True 
                     else if power then
                       True
@@ -140,7 +155,7 @@ hammer_coalision power b x y =
                       False
 
 coin_coalision bonus b x y = 
-                    if (b+50+y > b+coin.y-25 && b+50+y < b+coin.y+25) && (x > coin.x-25 && x < coin.x+25) then 
+                    if (b+(transform_mario bonus)+y > b+coin.y-(midtransform_mario bonus) && b+(transform_mario bonus)+y < b+coin.y+(midtransform_mario bonus)) && (x > coin.x-(midtransform_mario bonus) && x < coin.x+(midtransform_mario bonus)) then 
                       True 
                     else if bonus then
                       True
